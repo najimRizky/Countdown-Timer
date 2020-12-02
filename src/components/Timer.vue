@@ -46,13 +46,20 @@
                     </v-row>
                     <v-row v-if="timerStats">
                         <v-col cols="12">
-                            <v-btn color="green" style="margin:0px 5px"  v-if="pauseStats">Start</v-btn>
-                            <v-btn color="yellow" style="margin:0px 5px" @click="pauseTimer()" v-if="!pauseStats">Pause</v-btn>
+                            <v-btn color="green" style="margin:0px 5px"  v-if="pauseStats" v-on:click="startTimer()">Start</v-btn>
+                            <v-btn color="yellow" style="margin:0px 5px" @click="jedaTimer()" v-if="!pauseStats">Pause</v-btn>
                             <v-btn color="red" style="margin:0px 5px" @click="resetTimer()">Reset</v-btn>
                         </v-col>
                     </v-row>
                 </v-col>
                 <v-spacer></v-spacer>
+            </v-row>
+            <v-row >
+                <v-col align="center">
+                    <h1 v-if="timerStats && !pauseStats">Timer is running</h1>
+                    <h1 v-if="finishStats">Timer is finish</h1>
+                    <h1 v-if="pauseStats">Paused!</h1>
+                </v-col>
             </v-row>
         </v-container>
     </div>
@@ -64,9 +71,11 @@
             jam: 0, menit: 0, detik: 0,
             timerStats: false,
             pauseStats: false,
+            finishStats: false,
             tmpJam: 0, tmpMenit: 0, tmpDetik: 0,
             tmp2Jam: 0, tmp2Menit: 0, tmp2Detik: 0,
             i:0,
+            pauseIndicator: 0,
             currThn:0,
             currBln:0,
             currTgl:0,
@@ -129,43 +138,59 @@
                 this.detik = this.formatNum(this.tmpDetik)  
             },
             startTimer(){
-                this.showRemaining()
+                if(this.pauseStats == true){
+                    this.tmpJam = this.tmp2Jam;
+                    this.tmpMenit = this.tmp2Menit;
+                    this.tmpDetik = this.tmp2Detik;
+                    this.pauseStats = false;
+                }
+                if(this.tmpJam > 0 || this.tmpMenit > 0 || this.tmpDetik > 0){
+                    this.showRemaining()
+                }
             },
             formatNum: num => (num < 10 ? '0' + num : num),
             showRemaining(){
-                if(this.tmpJam > 0 || this.tmpMenit > 0 || this.tmpDetik > 0){
-                    this.timerStats = true;
-                    this.pauseStats = false;
-                    const timerz = setInterval(() => {
-                        const now = new Date();
-                        if(this.i==0){
-                            this.currThn = now.getFullYear();
-                            this.currBln = now.getMonth();
-                            this.currTgl = now.getDate();
-                            this.currJam = now.getHours() + this.tmpJam;
-                            this.currMenit = now.getMinutes() + this.tmpMenit;
-                            this.currDetik = now.getSeconds()+ this.tmpDetik;     
-                            this.i += 1;
-                        }
-                        const end = new Date(this.currThn,this.currBln,this.currTgl,this.currJam, this.currMenit, this.currDetik);
-                        const distance = end.getTime() - now.getTime();
-                        if(distance < 0){
-                            clearInterval(timerz);
-                            this.tmpJam = 0;
-                            this.tmpMenit = 0;
-                            this.tmpDetik = 0;
-                            this.i = 0;
+                this.timerStats = true;
+                this.pauseStats = false;
+                const timerz = setInterval(() => {
+                    const now = new Date();
+                    if(this.i==0){
+                        //console.log('sini')
+                        this.currThn = now.getFullYear();
+                        this.currBln = now.getMonth();
+                        this.currTgl = now.getDate();
+                        this.currJam = now.getHours() + this.tmpJam;
+                        this.currMenit = now.getMinutes() + this.tmpMenit;
+                        this.currDetik = now.getSeconds()+ this.tmpDetik;     
+                        this.i += 1;
+                        //console.log('Curr jam ',this.currJam, this.currMenit, this.currDetik)
+                    }
+                    const end = new Date(this.currThn,this.currBln,this.currTgl,this.currJam, this.currMenit, this.currDetik);
+                    const distance = end.getTime() - now.getTime();
+                    //console.log('Distance: ', distance)
+                    if(distance < 0){
+                        clearInterval(timerz);
+                        this.tmpJam = 0;
+                        this.tmpMenit = 0;
+                        this.tmpDetik = 0;
+                        this.i = 0;
+                        if(this.pauseStats == false) {
+                            this.finishAlert();
                             this.timerStats = false;
-                            return;
                         }
-                        const jams = Math.floor(distance / this._jams);
-                        const menits = Math.floor((distance % this._jams) / this._menits);
-                        const detiks = Math.floor((distance % this._menits) / this._detiks);
-                        this.jam = this.formatNum(jams);
-                        this.menit = this.formatNum(menits);
-                        this.detik = this.formatNum(detiks);
-                    }, 1000);
-                }
+                        return;
+                    }
+                    const jams = Math.floor(distance / this._jams);
+                    const menits = Math.floor((distance % this._jams) / this._menits);
+                    const detiks = Math.floor((distance % this._menits) / this._detiks);
+                    this.tmp2Jam = jams;
+                    this.tmp2Menit =  menits;
+                    this.tmp2Detik = detiks;
+                    this.jam = this.formatNum(jams);
+                    this.menit = this.formatNum(menits);
+                    this.detik = this.formatNum(detiks);
+                    console.log('pause', this.tmp2Jam, this.tmp2Menit, this.tmp2Detik)
+                }, 1000);
             },
             resetTimer(){
                 clearInterval(this.timerz);
@@ -174,18 +199,24 @@
                 this.tmpDetik = 0; this.detik = this.formatNum(this.tmpDetik);
                 this.i = 0;
                 this.timerStats = false;
+                this.pauseStats = false;
                 return;
             },
-            pauseTimer(){
+            jedaTimer(){
                 clearInterval(this.timerz);
-                this.pauseStats = true;
-                /*this.tmp2Jam = ;
-                this.tmp2Menit = ;
-                this.tmp2Detik = ;*/
+                //const pauseNow = new Date();
+                this.i = 0;
                 this.tmpJam = 0;
                 this.tmpMenit = 0;
                 this.tmpDetik = 0;
+                this.pauseStats = true;
                 return;
+            },
+            finishAlert(){
+                    this.finishStats=true
+                setTimeout(()=>{
+                    this.finishStats=false
+                },2000)
             }
         }
     }
