@@ -1,7 +1,6 @@
 <template>
   <v-app>
     <v-main>
-      <h1 style="font-weight: normal">Najim Rizky - 40113</h1>
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -18,5 +17,10 @@ export default {
 </script>
 
 <style>
-  
+  body{
+  }
+  #app{
+    height: 100%;
+    background-color: rgb(12, 39, 43);
+  }
 </style>

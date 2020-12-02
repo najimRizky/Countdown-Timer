@@ -41,14 +41,14 @@
                     </v-row>
                     <v-row v-if="!timerStats">
                         <v-col cols="12">
-                            <v-btn  color="green" v-on:click="startTimer()">Start</v-btn>
+                            <v-btn  color="#036B0D" v-on:click="startTimer()" dark>Start</v-btn>
                         </v-col>
                     </v-row>
                     <v-row v-if="timerStats">
                         <v-col cols="12">
-                            <v-btn color="green" style="margin:0px 5px"  v-if="pauseStats" v-on:click="startTimer()">Start</v-btn>
-                            <v-btn color="yellow" style="margin:0px 5px" @click="jedaTimer()" v-if="!pauseStats">Pause</v-btn>
-                            <v-btn color="red" style="margin:0px 5px" @click="resetTimer()">Reset</v-btn>
+                            <v-btn color="#00B0A6" style="margin:0px 5px"  v-if="pauseStats" v-on:click="startTimer()" dark>Resume</v-btn>
+                            <v-btn color="#FFB300" style="margin:0px 5px" @click="jedaTimer()" v-if="!pauseStats" dark>Pause</v-btn>
+                            <v-btn color="red" style="margin:0px 5px" @click="resetTimer()" v-on:click="finishAlert()" dark>Reset</v-btn>
                         </v-col>
                     </v-row>
                 </v-col>
@@ -226,15 +226,18 @@
     img{
         width: 30px;
         cursor: pointer;
+        filter: invert(100%);
     }
     #timer1{
         font-size: 30px;
         font-weight: bold;
+        color: white;
     }
     .timer1{
     justify-content: center;
     align-items: center;
     display: flex;
     height: 100%;
+    color: white;
     }
 </style>
